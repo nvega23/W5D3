@@ -30,7 +30,7 @@ class Users
     def self.authored_questions(id)
         authored_questions = []
         Users.find_by_id(id).each do |ele|
-            authored_questions << Question.find_by_user_id(1)
+            authored_questions << Question.find_by_author_id(id)
         end
         authored_questions
     end
@@ -39,6 +39,10 @@ class Users
         @id = options['id']
         @fname = options['fname']
         @lname = options['lname']
+    end
+
+    def authored_replies(id)
+        Reply.find_by_user_id(id).map{|ele| ele.reply_body }
     end
 
 end
@@ -66,8 +70,16 @@ class Question
         Question.all.select{|ele| ele.title == title}
     end
 
-    def self.find_by_user_id(id)
+    def self.find_by_author_id(id)
         Question.all.select{|ele| ele.user_id == id}
+    end
+
+    def author(id)
+        User.find_by_id(id).map{|ele| ele.fname + ele.lname}
+    end
+
+    def replies(id)
+        Reply.find_by_question_id()
     end
 
 end
@@ -95,11 +107,11 @@ class QuestionFollows
 
 end
 
-class Replies
+class Reply
     attr_accessor :id, :question_id, :parent_reply_id, :parent_reply_id, :user_id, :reply_body, :top_level, :subject_question
     def self.all
         data = QuestionsDatabase.instance.execute("SELECT * FROM replies")
-        data.map{|datum| Replies.new(datum)}
+        data.map{|datum| Reply.new(datum)}
     end
 
     def initialize(options)
@@ -112,14 +124,13 @@ class Replies
         subject_question = options['subject_question']
     end
 
-    def self.find_by_id(id)
-        Replies.all.select{|ele| ele.id == id}
+    def self.find_by_user_id(id)
+        Reply.all.select{|ele| ele.user_id == id}
     end
 
-    def self.find_by_subject_question(subject)
-        Replies.all.select{|ele| ele.subject == subject}
+    def self.find_by_question_id(id)
+        Reply.all.select{|ele| ele.question_id == id}
     end
-
 
 end
 
