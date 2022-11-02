@@ -103,19 +103,37 @@ class QuestionFollows
         QuestionFollows.all.select{|ele| ele.id == id}
     end
 
-    def self.followers_for_question_id()
+    def self.followers_for_question_id(id)
         followers = []
-       k = QuestionsDatabase.instance.execute(
-      'SELECT *
-      FROM question_follows
-      JOIN users
-        ON users.id = question_follows.id'
+        k = QuestionsDatabase.instance.execute(
+        'SELECT *
+        FROM question_follows
+        JOIN users
+        ON users.id = question_follows.users_id'
         )
-        k.each {|ele| followers << ele['users_id']}
+        k.each do |ele|
+            if Users.find_by_id(ele['users_id'])[0].id == id
+                followers << Users.find_by_id(ele['users_id'])
+            end
+        end
         followers
     end
 
-
+    def self.followed_questions_for_user_id(id)
+        followers = []
+        k = QuestionsDatabase.instance.execute(
+        'SELECT *
+        FROM question_follows
+        JOIN questions
+        ON questions.id = question_follows.question_id'
+        )
+        k.each do |ele|
+            if Users.find_by_id(ele['users_id'])[0].id == id
+                followers << Users.find_by_id(ele['users_id'])
+            end
+        end
+        followers
+    end
 
 end
 
