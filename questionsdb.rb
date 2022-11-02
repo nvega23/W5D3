@@ -5,7 +5,7 @@ class QuestionsDatabase < SQLite3::Database
     include Singleton
 
     def initialize
-        super(questions.db)
+        super('questions.db')
         self.type_translation = true
         self.results_as_hash = true
     end
@@ -13,7 +13,7 @@ class QuestionsDatabase < SQLite3::Database
 end
 
 class Users
-
+    attr_accessor :id, :fname, :lname
     def self.all
         data = QuestionsDatabase.instance.execute("SELECT * FROM users")
         data.map{|datum| Users.new(datum)}
@@ -27,6 +27,14 @@ class Users
         Users.all.select{|ele| ele.fname == fname && ele.lname == lname}
     end
 
+    def self.authored_questions(id)
+        authored_questions = []
+        Users.find_by_id(id).each do |ele|
+            authored_questions << Question.find_by_user_id(1)
+        end
+        authored_questions
+    end
+
     def initialize(options)
         @id = options['id']
         @fname = options['fname']
@@ -36,17 +44,17 @@ class Users
 end
 
 class Question
-
+    attr_accessor :id, :title, :body, :user_id
     def self.all
         data = QuestionsDatabase.instance.execute("SELECT * FROM questions")
-        data.map{|datum| Users.new(datum)}
+        data.map{|datum| Question.new(datum)}
     end
 
     def initialize(options)
         @id = options['id']
         @title = options['title']
         @body = options['body']
-        @author_id = options['author_id']
+        @user_id = options['user_id']
     end
 
 
@@ -58,17 +66,19 @@ class Question
         Question.all.select{|ele| ele.title == title}
     end
 
-    def self.find_by_author_id(id)
-        Question.all.select{|ele| ele.author_id == author_id}
+    def self.find_by_user_id(id)
+        Question.all.select{|ele| ele.user_id == id}
     end
 
 end
 
 class QuestionFollows
 
+    attr_accessor :id, :question_id, :users_id
+
     def self.all
         data = QuestionsDatabase.instance.execute("SELECT * FROM question_follows")
-        data.map{|datum| Users.new(datum)}
+        data.map{|datum| QuestionFollows.new(datum)}
     end
 
     def initialize(options)
@@ -86,10 +96,10 @@ class QuestionFollows
 end
 
 class Replies
-
+    attr_accessor :id, :question_id, :parent_reply_id, :parent_reply_id, :user_id, :reply_body, :top_level, :subject_question
     def self.all
         data = QuestionsDatabase.instance.execute("SELECT * FROM replies")
-        data.map{|datum| Users.new(datum)}
+        data.map{|datum| Replies.new(datum)}
     end
 
     def initialize(options)
@@ -115,9 +125,11 @@ end
 
 class QuestionLikes
 
+    attr_accessor :id, :question_likes, :user_id, :question_id
+
     def self.all
         data = QuestionsDatabase.instance.execute("SELECT * FROM question_likes")
-        data.map{|datum| Users.new(datum)}
+        data.map{|datum| QuestionLikes.new(datum)}
     end
 
     def initialize(options)
