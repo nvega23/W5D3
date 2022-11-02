@@ -25,7 +25,11 @@ CREATE TABLE questions (
 CREATE TABLE question_follows (
     id INTEGER PRIMARY KEY,
     question_id INTEGER NOT NULL,
-    users_id INTEGER NOT NULL
+    users_id INTEGER NOT NULL,
+
+    FOREIGN KEY (users_id) REFERENCES users(id)
+    FOREIGN KEY (question_id) REFERENCES questions(id)
+
 );
 
 
@@ -71,3 +75,8 @@ INSERT INTO
 VALUES
   ('whatever', 'whats my name', (SELECT id FROM users WHERE fname = 'Arthur')),
   ('i dont know', 'where am i', (SELECT id FROM users WHERE fname = 'Eugene'));
+
+INSERT INTO
+    question_follows (question_id, users_id)
+VALUES
+    ((SELECT id FROM questions WHERE title = 'whatever'),(SELECT id FROM users WHERE fname = 'Eugene'));

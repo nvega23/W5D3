@@ -79,7 +79,7 @@ class Question
     end
 
     def replies(id)
-        Reply.find_by_question_id()
+        Reply.find_by_question_id(id).map{ |ele| ele.reply_body}
     end
 
 end
@@ -101,6 +101,18 @@ class QuestionFollows
 
     def self.find_by_id(id)
         QuestionFollows.all.select{|ele| ele.id == id}
+    end
+
+    def self.followers_for_question_id()
+        followers = []
+       k = QuestionsDatabase.instance.execute(
+      'SELECT *
+      FROM question_follows
+      JOIN users
+        ON users.id = question_follows.id'
+        )
+        k.each {|ele| followers << ele['users_id']}
+        followers
     end
 
 
@@ -130,6 +142,22 @@ class Reply
 
     def self.find_by_question_id(id)
         Reply.all.select{|ele| ele.question_id == id}
+    end
+
+    def author(id)
+        User.find_by_id(id).map{|ele| ele.fname + ele.lname}
+    end
+
+    def question(id)
+        Question.find_by_id(id).map{|ele| ele.body}
+    end
+
+    def parent_reply(id)
+    #    Reply.parent_reply_id(id).map{|ele| ele.parent_reply_id}
+    end
+
+    def child_reply(id)
+
     end
 
 end
