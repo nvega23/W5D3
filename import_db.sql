@@ -1,8 +1,8 @@
-PRAGMA foreign_keys = ON;
+-- PRAGMA foreign_keys = ON;
 
 
 DROP table if exists users;
-CREATE TABLE users(
+CREATE TABLE users (
     id INTEGER PRIMARY KEY,
     fname TEXT NOT NULL,
     lname TEXT NOT NULL
@@ -11,11 +11,11 @@ CREATE TABLE users(
 );
 
 DROP table if exists questions;
-CREATE TABLE questions(
+CREATE TABLE questions (
     id INTEGER PRIMARY KEY,
     title TEXT NOT NULL,
-    author_id INTEGER NOT NULL,
     body TEXT NOT NULL,
+    author_id INTEGER NOT NULL,
 
     FOREIGN KEY (author_id) REFERENCES users(id)
 );
