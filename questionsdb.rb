@@ -41,6 +41,11 @@ class Users
         @lname = options['lname']
     end
 
+    def followed_questions(id)
+        QuestionFollows.followers_for_question_id(id)
+    end
+
+
     def authored_replies(id)
         Reply.find_by_user_id(id).map{|ele| ele.reply_body }
     end
@@ -82,6 +87,10 @@ class Question
         Reply.find_by_question_id(id).map{ |ele| ele.reply_body}
     end
 
+    def followers(id)
+        QuestionFollows.followed_questions_for_user_id(id)
+    end
+
 end
 
 class QuestionFollows
@@ -104,36 +113,38 @@ class QuestionFollows
     end
 
     def self.followers_for_question_id(id)
-        followers = []
+
         k = QuestionsDatabase.instance.execute(
         'SELECT *
         FROM question_follows
         JOIN users
         ON users.id = question_follows.users_id'
         )
-        k.each do |ele|
-            if Users.find_by_id(ele['users_id'])[0].id == id
-                followers << Users.find_by_id(ele['users_id'])
-            end
-        end
-        followers
+        k.select { |ele| Users.find_by_id(ele['users_id'])[0].id == id }
+
     end
 
     def self.followed_questions_for_user_id(id)
-        followers = []
         k = QuestionsDatabase.instance.execute(
-        'SELECT *
-        FROM question_follows
-        JOIN questions
-        ON questions.id = question_follows.question_id'
-        )
-        k.each do |ele|
-            if Users.find_by_id(ele['users_id'])[0].id == id
-                followers << Users.find_by_id(ele['users_id'])
-            end
-        end
-        followers
+            'SELECT *
+            FROM question_follows
+            JOIN questions
+            ON questions.id = question_follows.question_id'
+            )
+            k.select { |ele| Question.find_by_id(ele['question_id'])[0].id == id }
     end
+
+    def self.most_followed_questions(n)
+        k = QuestionsDatabase.instance.execute(
+            "SELECT *
+            FROM questions
+            LIMIT #{n}
+            "
+        )
+        k
+    end
+
+
 
 end
 
